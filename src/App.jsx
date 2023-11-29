@@ -1,25 +1,26 @@
+import Question from './components/Question';
 import { useEffect, useState } from 'react';
+import { nanoid } from 'nanoid';
 import './App.css';
 
 const App = () => {
   const [gameStatus, setGameStatus] = useState(false);
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        'https://opentdb.com/api.php?amount=5&type=multiple'
+      );
+      const fetchedData = await response.json();
+      setData(fetchedData.results);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  };
 
   useEffect(() => {
     if (gameStatus) {
-      const fetchData = async () => {
-        try {
-          const response = await fetch('https://opentdb.com/api.php?amount=5');
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          const jsonData = await response.json();
-          setData(jsonData.results);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-
       fetchData();
     }
   }, [gameStatus]);
@@ -31,8 +32,12 @@ const App = () => {
       </div>
       <main className='main-content'>
         <div className='content-container'>
-          {gameStatus ? (
-            <h1>melo</h1>
+          {gameStatus && data.length > 0 ? (
+            <>
+              {data.map((d) => (
+                <Question key={nanoid()} data={d} />
+              ))}
+            </>
           ) : (
             <>
               <h1 className='title'>Quizzical</h1>
